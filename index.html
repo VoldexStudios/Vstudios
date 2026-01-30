@@ -1,0 +1,3618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vstudio - Roblox Development Team</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            --text-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --bg-color: #0f0c29;
+            --text-color: #fff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(15, 12, 41, 0.8);
+            --particle-1: rgba(102, 126, 234, 0.1);
+            --particle-2: rgba(118, 75, 162, 0.1);
+            --particle-3: rgba(240, 147, 251, 0.08);
+        }
+
+        body.light-mode {
+            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f5f3ff 50%, #fae8ff 100%);
+            --bg-color: #f0f0f0;
+            --text-color: #1a1a1a;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(102, 126, 234, 0.2);
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --particle-1: rgba(102, 126, 234, 0.05);
+            --particle-2: rgba(118, 75, 162, 0.05);
+            --particle-3: rgba(240, 147, 251, 0.04);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+            scroll-behavior: smooth;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+            transition: background 0.5s ease;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--text-gradient);
+            border: 2px solid var(--card-border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(20deg);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .theme-icon {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            z-index: 10001;
+            transition: all 0.3s ease;
+            padding: 10px;
+        }
+
+        .hamburger-menu:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .hamburger-line {
+            width: 25px;
+            height: 3px;
+            background: var(--text-gradient);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-menu:hover .hamburger-line {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* Menu Dropdown */
+        .menu-dropdown {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid var(--card-border);
+            z-index: 10000;
+            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        body.light-mode .menu-dropdown {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .menu-dropdown.open {
+            right: 0;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .menu-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .close-menu {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .close-menu:hover {
+            color: #f5576c;
+            transform: rotate(90deg);
+        }
+
+        .menu-items {
+            padding: 1rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .menu-icon {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .menu-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 2px;
+            background: var(--text-gradient);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #fff;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .dev-access {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border-radius: 5px;
+        }
+
+        .sign-in-btn {
+            background: var(--text-gradient);
+            border: none;
+            color: white;
+            padding: 0.6rem 1.8rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sign-in-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, var(--particle-1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--particle-2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, var(--particle-3) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+            transition: background-image 0.5s ease;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        /* Grid pattern overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(102, 126, 234, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(102, 126, 234, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            padding: 5rem 0 3rem 0;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 4rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid var(--card-border);
+            transition: background 0.5s ease, border 0.5s ease;
+        }
+
+        .about-text {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            transition: color 0.5s ease;
+        }
+
+        .about-text:last-child {
+            margin-bottom: 0;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            animation: glow 3s ease-in-out infinite;
+            text-shadow: 0 0 80px rgba(102, 126, 234, 0.5);
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(102, 126, 234, 0.3)); }
+            50% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(118, 75, 162, 0.5)); }
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Projects Section */
+        .projects-section {
+            padding: 4rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--card-border);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .project-card:nth-child(2)::before { background: var(--gradient-2); }
+        .project-card:nth-child(3)::before { background: var(--gradient-3); }
+        .project-card:nth-child(4)::before { background: var(--gradient-4); }
+        .project-card:nth-child(5)::before { background: var(--gradient-5); }
+
+        .project-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .project-card:nth-child(2) .project-icon { animation-delay: 0.5s; }
+        .project-card:nth-child(3) .project-icon { animation-delay: 1s; }
+        .project-card:nth-child(4) .project-icon { animation-delay: 1.5s; }
+        .project-card:nth-child(5) .project-icon { animation-delay: 2s; }
+
+        .project-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .project-card:nth-child(2) .project-title { background: var(--gradient-2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .project-card:nth-child(3) .project-title { background: var(--gradient-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .project-card:nth-child(4) .project-title { background: var(--gradient-4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .project-card:nth-child(5) .project-title { background: var(--gradient-5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        .project-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .project-status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        footer p {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+
+            .tagline {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-link {
+                font-size: 1rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .about-content {
+                padding: 2rem;
+            }
+
+            .about-text {
+                font-size: 1.1rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .project-card {
+                padding: 2rem;
+            }
+
+            .merch-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dev-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .theme-toggle {
+                width: 50px;
+                height: 50px;
+                bottom: 1.5rem;
+                right: 1.5rem;
+                font-size: 1.5rem;
+            }
+
+            .game-title-large {
+                font-size: 2rem;
+            }
+
+            .game-image {
+                height: 250px;
+            }
+
+            .game-details {
+                padding: 2rem;
+            }
+
+            .creators-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .game-actions {
+                flex-direction: column;
+            }
+
+            .hamburger-menu {
+                top: 1.5rem;
+                right: 1.5rem;
+                width: 45px;
+                height: 45px;
+            }
+
+            .menu-dropdown {
+                width: 280px;
+            }
+        }
+
+        /* Stagger animation for cards */
+        .project-card {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .project-card:nth-child(1) { animation-delay: 0.1s; }
+        .project-card:nth-child(2) { animation-delay: 0.2s; }
+        .project-card:nth-child(3) { animation-delay: 0.3s; }
+        .project-card:nth-child(4) { animation-delay: 0.4s; }
+        .project-card:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Merch Section */
+        .merch-section {
+            padding: 4rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .merch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .merch-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--card-border);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .merch-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(240, 147, 251, 0.3);
+            border-color: rgba(240, 147, 251, 0.5);
+        }
+
+        .merch-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .merch-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .merch-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+
+        .merch-price {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+
+        .merch-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .merch-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Developer Section */
+        .developer-section {
+            padding: 4rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dev-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dev-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .dev-card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dev-info {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .dev-info-small {
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .dev-stat {
+            font-weight: 700;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.3rem;
+        }
+
+        .status-online {
+            color: #43e97b !important;
+            background: none !important;
+            -webkit-text-fill-color: #43e97b !important;
+        }
+
+        .status-offline {
+            color: #f5576c !important;
+            background: none !important;
+            -webkit-text-fill-color: #f5576c !important;
+        }
+
+        .dev-action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dev-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #f5576c 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            display: block;
+            margin: 2rem auto 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 4rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .contact-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--card-border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .contact-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .contact-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+            transition: color 0.5s ease;
+        }
+
+        .contact-description {
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            transition: color 0.5s ease;
+        }
+
+        .contact-form-wrapper {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--card-border);
+            transition: background 0.5s ease, border 0.5s ease;
+        }
+
+        .form-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .form-input {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .form-input select,
+        select.form-input {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+        }
+
+        .form-input option {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        body.light-mode .form-input select,
+        body.light-mode select.form-input {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        body.light-mode .form-input option {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-color);
+            opacity: 0.5;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-submit {
+            width: 100%;
+            background: var(--text-gradient);
+            border: none;
+            color: white;
+            padding: 1.2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Success Popup */
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 25px;
+            border: 2px solid #43e97b;
+            box-shadow: 0 20px 60px rgba(67, 233, 123, 0.4);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            max-width: 500px;
+        }
+
+        body.light-mode .success-popup {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: #43e97b;
+        }
+
+        .success-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes checkPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .success-text {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            font-weight: 500;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            margin: 5% auto;
+            padding: 3rem;
+            border: 2px solid var(--card-border);
+            border-radius: 25px;
+            max-width: 500px;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-mode .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: #f5576c;
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .modal-subtitle {
+            text-align: center;
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Sign In Modal */
+        .sign-in-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .oauth-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: 'Rajdhani', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .oauth-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .oauth-icon {
+            font-size: 1.5rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            font-weight: 600;
+        }
+
+        .email-sign-in {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .auth-input {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .auth-submit-btn {
+            width: 100%;
+            background: var(--text-gradient);
+            border: none;
+            color: white;
+            padding: 1.2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .auth-submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .auth-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .auth-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .settings-modal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .settings-modal::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .settings-modal::-webkit-scrollbar-thumb {
+            background: var(--text-gradient);
+            border-radius: 10px;
+        }
+
+        .user-info-card {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            background: var(--text-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .user-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0 0 0.3rem 0;
+        }
+
+        .user-email {
+            color: var(--text-color);
+            opacity: 0.7;
+            margin: 0;
+        }
+
+        .settings-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .settings-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .setting-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-label {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .setting-description {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+            margin-left: 1rem;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--text-gradient);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .setting-action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .setting-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .twofa-setup {
+            width: 100%;
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(67, 233, 123, 0.05);
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .twofa-text {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin: 1rem auto;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 2px solid #43e97b;
+        }
+
+        .verify-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            color: white;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            margin-top: 1rem;
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+        }
+
+        .danger-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #f5576c 0%, #ff6b7a 100%);
+            border: none;
+            color: white;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .danger-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        /* Game Modal */
+        .game-modal {
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .game-modal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .game-modal::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .game-modal::-webkit-scrollbar-thumb {
+            background: var(--text-gradient);
+            border-radius: 10px;
+        }
+
+        .game-header {
+            position: relative;
+            width: 100%;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 25px 25px 0 0;
+            display: block;
+        }
+
+        .game-header-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .game-title-large {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .game-status-badge {
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: white;
+        }
+
+        .game-details {
+            padding: 3rem;
+        }
+
+        .game-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .game-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-full-description {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .game-features-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .game-features-list li {
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .game-features-list li:hover {
+            transform: translateX(10px);
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .game-features-list li::before {
+            content: '✨ ';
+            margin-right: 0.5rem;
+        }
+
+        .creators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .creator-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .creator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .creator-avatar {
+            width: 70px;
+            height: 70px;
+            background: var(--text-gradient);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .creator-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .creator-role {
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .play-game-btn {
+            flex: 2;
+            background: var(--text-gradient);
+            border: none;
+            color: white;
+            padding: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .play-game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .favorite-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--card-border);
+            color: var(--text-color);
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .favorite-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: gold;
+            transform: scale(1.05);
+        }
+
+        .favorite-btn.favorited {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-color: #ffd700;
+            color: #000;
+        }
+
+        /* Game Link Popup - Appears over everything */
+        .game-link-popup {
+            display: block;
+            position: fixed;
+            z-index: 20000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .game-link-content {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            margin: 10% auto;
+            padding: 3rem;
+            border: 2px solid var(--card-border);
+            border-radius: 25px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        body.light-mode .game-link-content {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .close-popup {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .close-popup:hover {
+            color: #f5576c;
+            transform: rotate(90deg);
+        }
+
+        /* Tasks Section */
+        .tasks-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            transition: background 0.5s ease, border 0.5s ease;
+        }
+
+        .add-task-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .task-input {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .add-task-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+        }
+
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateX(5px);
+        }
+
+        .task-text {
+            flex: 1;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .task-complete-btn,
+        .task-delete-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .task-complete-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .task-complete-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .task-delete-btn {
+            background: linear-gradient(135deg, #f5576c 0%, #ff6b7a 100%);
+            color: white;
+        }
+
+        .task-delete-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+        }
+
+        /* Team Management Modal */
+        .team-modal {
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .team-management {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .add-member-section {
+            background: rgba(67, 233, 123, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(67, 233, 123, 0.2);
+        }
+
+        .add-member-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .add-member-btn {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .add-member-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+        }
+
+        .team-members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .team-member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .team-member-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .team-member-info {
+            flex: 1;
+        }
+
+        .team-member-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .team-member-role-input {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+            width: 200px;
+        }
+
+        body.light-mode .team-member-role-input {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .team-member-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .save-role-btn,
+        .remove-member-btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .save-role-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .save-role-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .remove-member-btn {
+            background: linear-gradient(135deg, #f5576c 0%, #ff6b7a 100%);
+            color: white;
+        }
+
+        .remove-member-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // ==========================================
+        // FIREBASE CONFIGURATION
+        // ==========================================
+        // TODO: Replace with your Firebase config from https://console.firebase.google.com/
+        // 1. Go to Firebase Console: https://console.firebase.google.com/
+        // 2. Create a new project (or use existing)
+        // 3. Go to Project Settings > General > Your apps > Web app
+        // 4. Copy the firebaseConfig and paste below
+        
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        let auth;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            console.log("Please add your Firebase configuration to enable real authentication");
+        }
+
+        // ==========================================
+        // AUTHENTICATION FUNCTIONS
+        // ==========================================
+        
+        let currentUser = null;
+
+        // Game data with details
+        const gamesData = {
+            'galaxy-drifts': {
+                title: 'Galaxy Drifts',
+                status: 'Coming Soon',
+                image: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1200&h=800&fit=crop',
+                description: 'Embark on an epic interstellar adventure through the vast cosmos! Galaxy Drifts takes you on a thrilling journey across mysterious planets, ancient civilizations, and uncharted star systems. Navigate through asteroid fields, discover alien artifacts, and uncover the secrets of a long-lost galactic empire. With stunning visuals, immersive gameplay, and an epic storyline, this space exploration game will keep you on the edge of your seat.',
+                features: [
+                    'Explore 50+ unique planets and star systems',
+                    'Pilot customizable spacecraft with unique abilities',
+                    'Engage in epic space battles against alien forces',
+                    'Discover ancient ruins and unlock powerful artifacts',
+                    'Dynamic weather and environmental challenges',
+                    'Multiplayer co-op missions with friends'
+                ]
+            },
+            'bloxy-playhouse': {
+                title: 'Bloxy Playhouse',
+                status: 'Live - Chapter 2',
+                image: 'file:///C:/Users/Rayya/Downloads/rsz_chatgpt_image_jan_29_2026_02_26_45_pm-1200x800.png',
+                gameLink: 'https://www.roblox.com/games/77346605827452/BloxysPlayhouse',
+                description: 'Welcome to Bloxy Playhouse, where your worst nightmares come to life. Enter the abandoned playhouse if you dare, but beware - something sinister lurks in the shadows. Chapter 2 brings new horrors, expanded areas, and terrifying encounters that will test your courage. Solve puzzles, uncover dark secrets, and try to escape before it\'s too late. This psychological horror experience features jump scares, atmospheric tension, and a story that will haunt you long after you stop playing. Can you survive the night?',
+                features: [
+                    'Intense psychological horror experience',
+                    'Chapter 2 with expanded story and new areas',
+                    'Atmospheric sound design and creepy environments',
+                    'Challenging puzzles and hidden secrets',
+                    'Multiple endings based on your choices',
+                    'Solo or co-op multiplayer (survive together!)'
+                ]
+            },
+            'speed-run-arena': {
+                title: 'Speed Run Arena',
+                status: 'Live',
+                image: 'file:///C:/Users/Rayya/Downloads/thumbnail_1200x800.png',
+                description: 'Are you fast enough? Speed Run Arena is the ultimate parkour challenge where every second counts! Race through increasingly difficult obstacle courses, master complex movement mechanics, and compete against players worldwide. With global leaderboards, daily challenges, and custom track creation, there\'s always a new challenge waiting. Perfect your timing, master the physics, and become the fastest runner in the arena!',
+                features: [
+                    'Over 100 challenging obstacle courses',
+                    'Global leaderboards and competitive rankings',
+                    'Daily and weekly speedrun challenges',
+                    'Custom track builder with sharing features',
+                    'Advanced movement mechanics and shortcuts',
+                    'Cosmetic rewards and achievement system'
+                ]
+            },
+            'space-tycoon': {
+                title: 'Space Tycoon',
+                status: 'Beta',
+                image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=1200&h=800&fit=crop',
+                description: 'Build your galactic empire from the ground up! Start with a small space station and expand into a massive interstellar corporation. Mine asteroids, establish trade routes, research new technologies, and dominate the galactic economy. Manage resources wisely, defend against space pirates, and compete with other tycoons to become the wealthiest entity in the universe. Your journey to becoming a space billionaire starts now!',
+                features: [
+                    'Build and upgrade space stations and mining facilities',
+                    'Establish trade routes across the galaxy',
+                    'Research cutting-edge space technologies',
+                    'Hire and manage a crew of specialists',
+                    'Defend against pirates and rival corporations',
+                    'Economy simulation with dynamic market prices'
+                ]
+            },
+            'battle-royale-x': {
+                title: 'Battle Royale X',
+                status: 'Coming Soon',
+                image: 'file:///C:/Users/Rayya/Downloads/roblox_combat_thumbnail_1200x800.png',
+                description: 'Drop in, gear up, and be the last one standing! Battle Royale X delivers intense 100-player combat on a massive, ever-evolving island. Loot unique weapons, build strategic defenses, and outsmart your opponents in the ultimate survival showdown. With dynamic storm mechanics, destructible environments, and constant updates, every match is a new adventure. Form squads with friends or go solo – do you have what it takes to claim victory?',
+                features: [
+                    '100-player intense PvP combat',
+                    'Massive evolving map with multiple biomes',
+                    'Over 50 unique weapons and power-ups',
+                    'Building and defensive structures',
+                    'Squad, duo, and solo game modes',
+                    'Seasonal events and limited-time modes'
+                ]
+            },
+            'creative-studio': {
+                title: 'Creative Studio',
+                status: 'Planned',
+                image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=800&fit=crop',
+                description: 'Your imagination is the only limit! Creative Studio provides powerful building tools that let you create anything you can dream of. Design intricate structures, script interactive experiences, and share your creations with millions of players. Whether you want to build a theme park, a puzzle game, or an epic adventure, our intuitive tools make it possible. Join a thriving community of creators and bring your ideas to life!',
+                features: [
+                    'Advanced building tools and assets library',
+                    'Visual scripting system for interactions',
+                    'Terrain editing and environmental tools',
+                    'Publish and monetize your creations',
+                    'Collaborative building with friends',
+                    'Community showcase and featured creations'
+                ]
+            }
+        };
+
+        // Game Modal Functions
+        function openGameModal(gameId) {
+            const game = gamesData[gameId];
+            if (!game) return;
+
+            // Set game details
+            document.getElementById('gameImage').src = game.image;
+            document.getElementById('gameTitle').textContent = game.title;
+            document.getElementById('gameStatus').textContent = game.status;
+            document.getElementById('gameFullDescription').textContent = game.description;
+
+            // Set features
+            const featuresList = document.getElementById('gameFeatures');
+            featuresList.innerHTML = '';
+            game.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+
+            // Render team members dynamically from devTeam array
+            renderGameCreators();
+
+            // Update Play button based on if game has a link
+            const playBtn = document.querySelector('.play-game-btn');
+            if (game.gameLink) {
+                playBtn.textContent = '🎮 Play on Roblox';
+                playBtn.onclick = () => showGameLink(game.gameLink);
+            } else {
+                playBtn.textContent = 'Play Now';
+                playBtn.onclick = () => alert('Game launching soon!');
+            }
+
+            // Show modal
+            document.getElementById('gameModal').style.display = 'block';
+        }
+
+        function renderGameCreators() {
+            const creatorsGrid = document.getElementById('gameCreatorsGrid');
+            if (!creatorsGrid) return;
+
+            creatorsGrid.innerHTML = '';
+
+            devTeam.forEach(member => {
+                const creatorCard = document.createElement('div');
+                creatorCard.className = 'creator-card';
+                creatorCard.innerHTML = `
+                    <div class="creator-avatar">👤</div>
+                    <div class="creator-name">${member.name}</div>
+                    <div class="creator-role">${member.role}</div>
+                `;
+                creatorsGrid.appendChild(creatorCard);
+            });
+        }
+
+        function showGameLink(link) {
+            // Create link display popup with higher z-index
+            const popup = document.createElement('div');
+            popup.className = 'game-link-popup';
+            popup.innerHTML = `
+                <div class="game-link-content">
+                    <span class="close-popup" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <div class="success-icon" style="font-size: 4rem; margin-bottom: 1rem;">🎮</div>
+                    <h3 class="success-title" style="font-size: 2rem; margin-bottom: 1.5rem;">Play Bloxy Playhouse</h3>
+                    <div style="display: flex; gap: 0.5rem; margin: 1.5rem 0; align-items: center;">
+                        <input type="text" value="${link}" id="gameLinkInput" readonly 
+                               style="flex: 1; padding: 1rem; border-radius: 10px; border: 1px solid var(--card-border); 
+                                      background: var(--card-bg); color: var(--text-color); font-size: 1rem; font-family: 'Rajdhani', sans-serif;">
+                        <button onclick="copyGameLink()" 
+                                style="padding: 1rem 1.5rem; background: var(--text-gradient); border: none; 
+                                       color: white; border-radius: 10px; cursor: pointer; font-weight: 700;
+                                       font-family: 'Rajdhani', sans-serif; transition: all 0.3s ease;">
+                            📋 Copy
+                        </button>
+                    </div>
+                    <button onclick="window.open('${link}', '_blank'); this.parentElement.parentElement.remove();" 
+                            style="width: 100%; padding: 1.2rem; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); 
+                                   border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: 700;
+                                   font-size: 1.2rem; font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+                                   transition: all 0.3s ease;">
+                        🚀 Open in Roblox
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.style.opacity = '1';
+            }, 10);
+            
+            // Close when clicking outside
+            popup.onclick = (e) => {
+                if (e.target === popup) {
+                    popup.style.opacity = '0';
+                    setTimeout(() => popup.remove(), 300);
+                }
+            };
+        }
+
+        function copyGameLink() {
+            const input = document.getElementById('gameLinkInput');
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile devices
+            
+            navigator.clipboard.writeText(input.value).then(() => {
+                showSuccessMessage('Link copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                document.execCommand('copy');
+                showSuccessMessage('Link copied to clipboard!');
+            });
+        }
+
+        function closeGameModal() {
+            document.getElementById('gameModal').style.display = 'none';
+        }
+
+        function toggleFavorite() {
+            const btn = document.querySelector('.favorite-btn');
+            btn.classList.toggle('favorited');
+            
+            if (btn.classList.contains('favorited')) {
+                btn.textContent = '⭐ Favorited';
+                showSuccessMessage('Added to your favorites!');
+            } else {
+                btn.textContent = '⭐ Add to Favorites';
+            }
+        }
+
+        // ==========================================
+        // AUTHENTICATION FUNCTIONS
+        // ==========================================
+
+        // Monitor authentication state
+        if (auth) {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = {
+                        name: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        uid: user.uid,
+                        photoURL: user.photoURL,
+                        emailVerified: user.emailVerified
+                    };
+                    updateUIAfterSignIn();
+                    
+                    // Update sign in button
+                    const signInBtn = document.querySelector('.sign-in-btn');
+                    if (signInBtn) {
+                        signInBtn.textContent = '⚙️ Settings';
+                        signInBtn.onclick = openSettingsModal;
+                    }
+                    
+                    // Check if 2FA is enrolled
+                    checkMultiFactorStatus(user);
+                } else {
+                    currentUser = null;
+                    const signInBtn = document.querySelector('.sign-in-btn');
+                    if (signInBtn) {
+                        signInBtn.textContent = 'Sign In';
+                        signInBtn.onclick = openSignInModal;
+                    }
+                }
+            });
+        }
+
+        function checkMultiFactorStatus(user) {
+            if (user.multiFactor && user.multiFactor.enrolledFactors.length > 0) {
+                const toggle = document.getElementById('toggle2FA');
+                if (toggle) {
+                    toggle.checked = true;
+                }
+            }
+        }
+
+        // Sign In Modal Functions
+        function openSignInModal() {
+            document.getElementById('signInModal').style.display = 'block';
+        }
+
+        function closeSignInModal() {
+            document.getElementById('signInModal').style.display = 'none';
+        }
+
+        // Google Sign In
+        async function signInWithGoogle() {
+            if (!auth) {
+                alert('Firebase not configured. Please add your Firebase configuration.');
+                return;
+            }
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+                closeSignInModal();
+                showSuccessMessage('Signed in with Google successfully!');
+            } catch (error) {
+                console.error('Google sign in error:', error);
+                alert('Sign in failed: ' + error.message);
+            }
+        }
+
+        // Microsoft Sign In
+        async function signInWithMicrosoft() {
+            if (!auth) {
+                alert('Firebase not configured. Please add your Firebase configuration.');
+                return;
+            }
+            
+            try {
+                const provider = new firebase.auth.OAuthProvider('microsoft.com');
+                await auth.signInWithPopup(provider);
+                closeSignInModal();
+                showSuccessMessage('Signed in with Microsoft successfully!');
+            } catch (error) {
+                console.error('Microsoft sign in error:', error);
+                alert('Sign in failed: ' + error.message);
+            }
+        }
+
+        // Email/Password Sign In
+        async function signInWithEmail(event) {
+            event.preventDefault();
+            
+            if (!auth) {
+                alert('Firebase not configured. Please add your Firebase configuration.');
+                return;
+            }
+            
+            const email = event.target.querySelector('input[type="email"]').value;
+            const password = event.target.querySelector('input[type="password"]').value;
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeSignInModal();
+                showSuccessMessage('Signed in successfully!');
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    // Try to create account if user doesn't exist
+                    if (confirm('Account not found. Create new account with this email?')) {
+                        try {
+                            await auth.createUserWithEmailAndPassword(email, password);
+                            closeSignInModal();
+                            showSuccessMessage('Account created and signed in successfully!');
+                        } catch (createError) {
+                            alert('Account creation failed: ' + createError.message);
+                        }
+                    }
+                } else {
+                    alert('Sign in failed: ' + error.message);
+                }
+            }
+        }
+
+        function updateUIAfterSignIn() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userEmail').textContent = currentUser.email;
+                
+                // Update avatar if available
+                if (currentUser.photoURL) {
+                    const avatar = document.querySelector('.user-avatar');
+                    avatar.innerHTML = `<img src="${currentUser.photoURL}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                }
+            }
+        }
+
+        // Settings Modal Functions
+        function openSettingsModal() {
+            if (!currentUser) {
+                openSignInModal();
+                return;
+            }
+            updateUIAfterSignIn();
+            document.getElementById('settingsModal').style.display = 'block';
+            
+            // Sync dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle) {
+                darkModeToggle.checked = !document.body.classList.contains('light-mode');
+            }
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        // Two-Factor Authentication (2FA)
+        async function toggle2FA() {
+            if (!auth || !currentUser) {
+                alert('Please sign in first');
+                return;
+            }
+            
+            const setupSection = document.getElementById('2faSetup');
+            const toggle = document.getElementById('toggle2FA');
+            
+            const user = auth.currentUser;
+            
+            if (toggle.checked) {
+                // Enable 2FA
+                try {
+                    const recaptchaVerifier = new firebase.auth.RecaptchaVerifier('verify-btn-container', {
+                        'size': 'invisible'
+                    });
+                    
+                    const phoneNumber = prompt('Enter your phone number for 2FA (with country code, e.g., +1234567890):');
+                    
+                    if (!phoneNumber) {
+                        toggle.checked = false;
+                        return;
+                    }
+                    
+                    const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
+                    const verificationId = await phoneAuthProvider.verifyPhoneNumber(
+                        phoneNumber,
+                        recaptchaVerifier
+                    );
+                    
+                    setupSection.style.display = 'block';
+                    
+                    // Store verification ID for later
+                    setupSection.dataset.verificationId = verificationId;
+                    
+                } catch (error) {
+                    console.error('2FA setup error:', error);
+                    alert('2FA setup failed: ' + error.message);
+                    toggle.checked = false;
+                }
+            } else {
+                // Disable 2FA
+                if (confirm('Are you sure you want to disable 2FA?')) {
+                    try {
+                        if (user.multiFactor && user.multiFactor.enrolledFactors.length > 0) {
+                            await user.multiFactor.unenroll(user.multiFactor.enrolledFactors[0]);
+                            showSuccessMessage('2FA disabled successfully');
+                            setupSection.style.display = 'none';
+                        }
+                    } catch (error) {
+                        alert('Failed to disable 2FA: ' + error.message);
+                        toggle.checked = true;
+                    }
+                } else {
+                    toggle.checked = true;
+                }
+            }
+        }
+
+        async function verify2FA() {
+            const setupSection = document.getElementById('2faSetup');
+            const codeInput = setupSection.querySelector('input');
+            const code = codeInput.value;
+            
+            if (code.length !== 6) {
+                alert('Please enter a valid 6-digit code');
+                return;
+            }
+            
+            try {
+                const verificationId = setupSection.dataset.verificationId;
+                const cred = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
+                const multiFactorAssertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
+                
+                await auth.currentUser.multiFactor.enroll(multiFactorAssertion, 'Phone 2FA');
+                
+                showSuccessMessage('2FA enabled successfully! Your account is now more secure.');
+                setupSection.style.display = 'none';
+                codeInput.value = '';
+            } catch (error) {
+                alert('Verification failed: ' + error.message);
+            }
+        }
+
+        function toggleThemeFromSettings() {
+            toggleTheme();
+        }
+
+        // Sign Out
+        async function signOut() {
+            if (!auth) {
+                alert('Not signed in');
+                return;
+            }
+            
+            try {
+                await auth.signOut();
+                closeSettingsModal();
+                
+                // Reset 2FA toggle
+                document.getElementById('toggle2FA').checked = false;
+                document.getElementById('2faSetup').style.display = 'none';
+                
+                showSuccessMessage('Signed out successfully!');
+            } catch (error) {
+                alert('Sign out failed: ' + error.message);
+            }
+        }
+
+        // ==========================================
+        // DEVELOPER ACCESS
+        // ==========================================
+        
+        const DEV_PASSWORD = "vstudio2025";
+
+        // Developer Dashboard Data
+        let devTeam = [
+            { name: 'rayyan87666', role: 'Owner' },
+            { name: 'nidhal293', role: 'Lead Developer' },
+            { name: 'trixtrap', role: 'Scripter' },
+            { name: 'BASHI', role: 'UI Designer' }
+        ];
+
+        // Load team from localStorage
+        function loadTeam() {
+            const saved = localStorage.getItem('vstudioTeam');
+            if (saved) {
+                try {
+                    devTeam = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading team:', e);
+                }
+            }
+        }
+
+        // Save team to localStorage
+        function saveTeam() {
+            localStorage.setItem('vstudioTeam', JSON.stringify(devTeam));
+        }
+
+        // Load team on page load
+        loadTeam();
+
+        let devTasks = [
+            { text: 'Fix player movement bug in Galaxy Drifts', completed: false },
+            { text: 'Add new weapons to Battle Royale X', completed: false },
+            { text: 'Optimize server performance', completed: true }
+        ];
+
+        // Load tasks from localStorage
+        function loadTasks() {
+            const saved = localStorage.getItem('vstudioTasks');
+            if (saved) {
+                try {
+                    devTasks = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading tasks:', e);
+                }
+            }
+        }
+
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('vstudioTasks', JSON.stringify(devTasks));
+        }
+
+        // Load tasks on page load
+        loadTasks();
+
+        // Real visitor tracking
+        let websiteStats = {
+            totalVisitors: 0,
+            activeNow: 1, // Current user
+            totalPlayers: 0,
+            lastUpdate: Date.now()
+        };
+
+        // Load saved stats from localStorage
+        function loadStats() {
+            const saved = localStorage.getItem('vstudioStats');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    websiteStats.totalVisitors = parsed.totalVisitors || 0;
+                    websiteStats.totalPlayers = parsed.totalPlayers || 0;
+                    websiteStats.activeNow = parsed.activeNow || 1;
+                } catch (e) {
+                    console.error('Error loading stats:', e);
+                }
+            }
+            
+            // Increment total visitors for this session
+            websiteStats.totalVisitors++;
+            
+            // Generate realistic active users (1-10) only if not already set
+            if (!saved || !websiteStats.activeNow) {
+                websiteStats.activeNow = Math.floor(Math.random() * 9) + 1;
+            }
+            
+            saveStats();
+        }
+
+        // Save stats to localStorage
+        function saveStats() {
+            localStorage.setItem('vstudioStats', JSON.stringify({
+                totalVisitors: websiteStats.totalVisitors,
+                totalPlayers: websiteStats.totalPlayers,
+                activeNow: websiteStats.activeNow,
+                lastUpdate: Date.now()
+            }));
+        }
+
+        // Simulate active users (between 1-10 for realistic feel)
+        function updateActiveUsers() {
+            websiteStats.activeNow = Math.floor(Math.random() * 9) + 1;
+            saveStats();
+            updateDashboardStats();
+        }
+
+        // Update dashboard display
+        function updateDashboardStats() {
+            const totalPlayersEl = document.getElementById('totalPlayers');
+            const activePlayersEl = document.getElementById('activePlayers');
+            const revenueEl = document.getElementById('revenue');
+
+            if (totalPlayersEl) {
+                totalPlayersEl.textContent = websiteStats.totalPlayers.toLocaleString();
+            }
+            if (activePlayersEl) {
+                activePlayersEl.textContent = websiteStats.activeNow.toLocaleString();
+            }
+            if (revenueEl) {
+                // Calculate revenue based on total players ($0.10 per player average)
+                const revenue = Math.floor(websiteStats.totalPlayers * 0.10);
+                revenueEl.textContent = '$' + revenue.toLocaleString();
+            }
+        }
+
+        // Simulate player joins (for demo purposes - every 30 seconds add 1-5 players)
+        function simulatePlayerActivity() {
+            setInterval(() => {
+                const newPlayers = Math.floor(Math.random() * 5) + 1;
+                websiteStats.totalPlayers += newPlayers;
+                saveStats();
+                updateDashboardStats();
+            }, 30000); // Every 30 seconds
+        }
+
+        // Initialize stats on page load
+        loadStats();
+        updateDashboardStats();
+        simulatePlayerActivity();
+
+        // Initialize tasks on page load
+        function initializeTasks() {
+            const tasksList = document.getElementById('tasksList');
+            if (tasksList) {
+                renderTasks();
+            }
+        }
+
+        // Dashboard Functions
+        function refreshAnalytics() {
+            // Update active users count
+            updateActiveUsers();
+            
+            // Update display
+            updateDashboardStats();
+            
+            showSuccessMessage('Analytics refreshed! Showing real data.');
+        }
+
+        function addPlayers() {
+            const amount = prompt('How many players to add?', '100');
+            if (amount && !isNaN(amount)) {
+                const numPlayers = parseInt(amount);
+                websiteStats.totalPlayers += numPlayers;
+                saveStats();
+                updateDashboardStats();
+                showSuccessMessage(`Added ${numPlayers} players!`);
+            }
+        }
+
+        function toggleServer(serverType) {
+            const testServer = document.getElementById('testServer');
+            
+            if (testServer.textContent === 'Offline') {
+                testServer.textContent = 'Online';
+                testServer.className = 'dev-stat status-online';
+                showSuccessMessage('Test server started successfully!');
+            } else {
+                testServer.textContent = 'Offline';
+                testServer.className = 'dev-stat status-offline';
+                showSuccessMessage('Test server stopped.');
+            }
+        }
+
+        function deployUpdate() {
+            if (confirm('Are you sure you want to deploy the update? This will restart all servers.')) {
+                showSuccessMessage('Update deployed successfully! Servers restarting...');
+            }
+        }
+
+        function viewLogs() {
+            alert('System Logs:\n\n[2025-01-29 14:32] Server started\n[2025-01-29 14:35] Player joined\n[2025-01-29 14:38] Game saved\n[2025-01-29 14:40] No errors detected');
+        }
+
+        function addUpdate() {
+            const update = prompt('Enter update description:');
+            if (update) {
+                showSuccessMessage('Update logged: ' + update);
+            }
+        }
+
+        // Tasks Functions
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (taskText) {
+                devTasks.push({ text: taskText, completed: false });
+                taskInput.value = '';
+                saveTasks(); // Save to localStorage
+                renderTasks();
+                showSuccessMessage('Task added!');
+            }
+        }
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            if (!tasksList) return;
+
+            tasksList.innerHTML = '';
+
+            if (devTasks.length === 0) {
+                tasksList.innerHTML = '<p style="text-align: center; color: var(--text-color); opacity: 0.7; padding: 2rem;">No tasks yet. Add your first task above!</p>';
+                return;
+            }
+
+            devTasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item' + (task.completed ? ' completed' : '');
+                taskItem.innerHTML = `
+                    <span class="task-text">${task.text}</span>
+                    <div class="task-actions">
+                        <button class="task-complete-btn" onclick="toggleTaskComplete(${index})">
+                            ${task.completed ? '↩️ Undo' : '✅ Complete'}
+                        </button>
+                        <button class="task-delete-btn" onclick="deleteTask(${index})">🗑️ Delete</button>
+                    </div>
+                `;
+                tasksList.appendChild(taskItem);
+            });
+        }
+
+        function toggleTaskComplete(index) {
+            devTasks[index].completed = !devTasks[index].completed;
+            saveTasks(); // Save to localStorage
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            if (confirm('Delete this task?')) {
+                devTasks.splice(index, 1);
+                saveTasks(); // Save to localStorage
+                renderTasks();
+                showSuccessMessage('Task deleted!');
+            }
+        }
+
+        // Team Management Functions
+        function openTeamManagement() {
+            renderTeamMembers();
+            document.getElementById('teamModal').style.display = 'block';
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').style.display = 'none';
+        }
+
+        function renderTeamMembers() {
+            const teamList = document.getElementById('teamMembersList');
+            if (!teamList) return;
+
+            teamList.innerHTML = '';
+
+            devTeam.forEach((member, index) => {
+                const memberItem = document.createElement('div');
+                memberItem.className = 'team-member-item';
+                memberItem.innerHTML = `
+                    <div class="team-member-info">
+                        <div class="team-member-name">${member.name}</div>
+                        <input type="text" class="team-member-role-input" id="role-${index}" value="${member.role}" placeholder="Role">
+                    </div>
+                    <div class="team-member-actions">
+                        <button class="save-role-btn" onclick="saveRole(${index})">💾 Save</button>
+                        <button class="remove-member-btn" onclick="removeMember(${index})">❌ Remove</button>
+                    </div>
+                `;
+                teamList.appendChild(memberItem);
+            });
+        }
+
+        function addTeamMember() {
+            const nameInput = document.getElementById('newMemberName');
+            const roleInput = document.getElementById('newMemberRole');
+
+            const name = nameInput.value.trim();
+            const role = roleInput.value.trim();
+
+            if (name && role) {
+                devTeam.push({ name, role });
+                nameInput.value = '';
+                roleInput.value = '';
+                saveTeam(); // Save to localStorage
+                renderTeamMembers();
+                showSuccessMessage(`${name} added to the team!`);
+            } else {
+                alert('Please enter both username and role');
+            }
+        }
+
+        function saveRole(index) {
+            const roleInput = document.getElementById(`role-${index}`);
+            const newRole = roleInput.value.trim();
+
+            if (newRole) {
+                devTeam[index].role = newRole;
+                saveTeam(); // Save to localStorage
+                showSuccessMessage(`${devTeam[index].name}'s role updated to ${newRole}!`);
+            }
+        }
+
+        function removeMember(index) {
+            const member = devTeam[index];
+            if (confirm(`Remove ${member.name} from the team?`)) {
+                devTeam.splice(index, 1);
+                saveTeam(); // Save to localStorage
+                renderTeamMembers();
+                showSuccessMessage(`${member.name} removed from the team.`);
+            }
+        }
+
+        function checkDevAccess(event) {
+            event.preventDefault();
+            
+            const password = prompt("Enter developer password:");
+            
+            if (password === DEV_PASSWORD) {
+                document.getElementById('developer').style.display = 'block';
+                document.getElementById('developer').scrollIntoView({ behavior: 'smooth' });
+                
+                event.target.innerHTML = '🔓 Dev';
+                event.target.style.background = 'linear-gradient(135deg, rgba(67, 233, 123, 0.3) 0%, rgba(56, 249, 215, 0.3) 100%)';
+                
+                // Initialize tasks and stats when dashboard opens
+                initializeTasks();
+                updateDashboardStats();
+            } else if (password !== null) {
+                alert("Access denied! Invalid password.");
+            }
+        }
+
+        function logout() {
+            document.getElementById('developer').style.display = 'none';
+            const devLink = document.querySelector('.dev-access');
+            devLink.innerHTML = '🔒 Dev';
+            devLink.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // UTILITY FUNCTIONS
+        // ==========================================
+
+        // Hamburger Menu Toggle
+        function toggleMenu() {
+            const menu = document.getElementById('menuDropdown');
+            menu.classList.toggle('open');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuDropdown');
+            const hamburger = document.querySelector('.hamburger-menu');
+            
+            if (menu && menu.classList.contains('open')) {
+                if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
+                    menu.classList.remove('open');
+                }
+            }
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const signInModal = document.getElementById('signInModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const gameModal = document.getElementById('gameModal');
+            const teamModal = document.getElementById('teamModal');
+            
+            if (event.target === signInModal) {
+                closeSignInModal();
+            }
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+            if (event.target === gameModal) {
+                closeGameModal();
+            }
+            if (event.target === teamModal) {
+                closeTeamModal();
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-icon');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            
+            body.classList.toggle('light-mode');
+            
+            if (body.classList.contains('light-mode')) {
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+                if (darkModeToggle) darkModeToggle.checked = false;
+            } else {
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+                if (darkModeToggle) darkModeToggle.checked = true;
+            }
+        }
+
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                themeIcon.textContent = '☀️';
+            }
+        });
+
+        // Contact form
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const name = form.querySelector('input[type="text"]').value;
+            const email = form.querySelector('input[type="email"]').value;
+            const issueType = form.querySelector('select').value;
+            const message = form.querySelector('textarea').value;
+            
+            const emailSubject = `Vstudio Support: ${issueType}`;
+            const emailBody = `Name: ${name}%0D%0AEmail: ${email}%0D%0AIssue Type: ${issueType}%0D%0A%0D%0AMessage:%0D%0A${message}`;
+            
+            window.location.href = `mailto:Rayyanofficial2024@gmail.com?subject=${emailSubject}&body=${emailBody}`;
+            
+            showSuccessMessage('Request Submitted! Your email client will open shortly.');
+            form.reset();
+        }
+
+        function showSuccessMessage(message) {
+            const popup = document.createElement('div');
+            popup.className = 'success-popup';
+            popup.innerHTML = `
+                <div class="success-content">
+                    <div class="success-icon">✅</div>
+                    <h3 class="success-title">Success!</h3>
+                    <p class="success-text">${message || 'Operation completed successfully!'}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.style.opacity = '1';
+                popup.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 10);
+            
+            setTimeout(() => {
+                popup.style.opacity = '0';
+                popup.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                setTimeout(() => {
+                    popup.remove();
+                }, 300);
+            }, 4000);
+        }
+
+        // Smooth scrolling
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link:not(.dev-access)');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    
+                    if (targetId.startsWith('#')) {
+                        const targetSection = document.querySelector(targetId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth' });
+                            navLinks.forEach(l => l.classList.remove('active'));
+                            this.classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', function() {
+                const sections = document.querySelectorAll('section, header');
+                let current = '';
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (scrollY >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <!-- Hidden container for reCAPTCHA -->
+    <div id="verify-btn-container"></div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#games" class="nav-link">Games</a></li>
+                <li><a href="#merch" class="nav-link">Merch</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#" class="nav-link dev-access" onclick="checkDevAccess(event)">🔒 Dev</a></li>
+                <li><button class="sign-in-btn" onclick="openSignInModal()">Sign In</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Hamburger Menu Button -->
+    <button class="hamburger-menu" onclick="toggleMenu()" aria-label="Menu">
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+    </button>
+
+    <!-- Menu Dropdown -->
+    <div id="menuDropdown" class="menu-dropdown">
+        <div class="menu-header">
+            <h3 class="menu-title">Menu</h3>
+            <span class="close-menu" onclick="toggleMenu()">&times;</span>
+        </div>
+        <div class="menu-items">
+            <div class="menu-item" onclick="openSettingsModal(); toggleMenu();">
+                <span class="menu-icon">⚙️</span>
+                <span class="menu-text">Settings</span>
+            </div>
+            <div class="menu-item" onclick="toggleTheme(); toggleMenu();">
+                <span class="menu-icon">🌓</span>
+                <span class="menu-text">Toggle Theme</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='#about'; toggleMenu();">
+                <span class="menu-icon">ℹ️</span>
+                <span class="menu-text">About Us</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='#games'; toggleMenu();">
+                <span class="menu-icon">🎮</span>
+                <span class="menu-text">Our Games</span>
+            </div>
+            <div class="menu-item" onclick="window.location.href='#contact'; toggleMenu();">
+                <span class="menu-icon">📧</span>
+                <span class="menu-text">Contact Support</span>
+            </div>
+            <div class="menu-item" onclick="checkDevAccess(event); toggleMenu();">
+                <span class="menu-icon">🔒</span>
+                <span class="menu-text">Developer Access</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign In Modal -->
+    <div id="signInModal" class="modal">
+        <div class="modal-content sign-in-modal">
+            <span class="close-modal" onclick="closeSignInModal()">&times;</span>
+            <h2 class="modal-title">Welcome to Vstudio</h2>
+            <p class="modal-subtitle">Sign in to access your account</p>
+            
+            <div class="sign-in-options">
+                <button class="oauth-btn google-btn" onclick="signInWithGoogle()">
+                    <span class="oauth-icon">🔵</span>
+                    <span>Continue with Google</span>
+                </button>
+                
+                <button class="oauth-btn microsoft-btn" onclick="signInWithMicrosoft()">
+                    <span class="oauth-icon">🟦</span>
+                    <span>Continue with Microsoft</span>
+                </button>
+            </div>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <form class="email-sign-in" onsubmit="signInWithEmail(event)">
+                <input type="email" class="auth-input" placeholder="Email address" required>
+                <input type="password" class="auth-input" placeholder="Password" required>
+                <button type="submit" class="auth-submit-btn">Sign In</button>
+            </form>
+            
+            <p class="auth-footer">Don't have an account? <a href="#" class="auth-link" onclick="alert('Sign up feature coming soon!')">Create one</a></p>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content settings-modal">
+            <span class="close-modal" onclick="closeSettingsModal()">&times;</span>
+            <h2 class="modal-title">Account Settings</h2>
+            
+            <div class="settings-section">
+                <div class="user-info-card">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <h3 class="user-name" id="userName">Guest User</h3>
+                        <p class="user-email" id="userEmail">Not signed in</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Security</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Two-Factor Authentication (2FA)</div>
+                        <div class="setting-description">Add an extra layer of security to your account</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle2FA" onchange="toggle2FA()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item" id="2faSetup" style="display: none;">
+                    <div class="twofa-setup">
+                        <p class="twofa-text">📱 Scan this QR code with your authenticator app:</p>
+                        <div class="qr-code">📲 QR CODE</div>
+                        <input type="text" class="auth-input" placeholder="Enter 6-digit code" maxlength="6">
+                        <button class="verify-btn" onclick="verify2FA()">Verify & Enable</button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Change Password</div>
+                        <div class="setting-description">Update your account password</div>
+                    </div>
+                    <button class="setting-action-btn" onclick="alert('Password change feature coming soon!')">Change</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Preferences</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Email Notifications</div>
+                        <div class="setting-description">Receive updates about games and events</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Dark Mode</div>
+                        <div class="setting-description">Toggle between light and dark themes</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle" onchange="toggleThemeFromSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <div class="setting-label">Game Updates</div>
+                        <div class="setting-description">Get notified about new releases</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="settings-section-title">Account Actions</h3>
+                
+                <button class="danger-btn" onclick="signOut()">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Detail Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content game-modal">
+            <span class="close-modal" onclick="closeGameModal()">&times;</span>
+            
+            <div class="game-header">
+                <img id="gameImage" class="game-image" src="" alt="Game Image">
+                <div class="game-header-info">
+                    <h2 id="gameTitle" class="game-title-large"></h2>
+                    <span id="gameStatus" class="game-status-badge"></span>
+                </div>
+            </div>
+
+            <div class="game-details">
+                <div class="game-section">
+                    <h3 class="game-section-title">About This Game</h3>
+                    <p id="gameFullDescription" class="game-full-description"></p>
+                </div>
+
+                <div class="game-section">
+                    <h3 class="game-section-title">🎮 Game Features</h3>
+                    <ul id="gameFeatures" class="game-features-list"></ul>
+                </div>
+
+                <div class="game-section">
+                    <h3 class="game-section-title">👥 Development Team</h3>
+                    <div class="creators-grid" id="gameCreatorsGrid">
+                        <!-- Team members will be loaded dynamically -->
+                    </div>
+                </div>
+
+                <div class="game-actions">
+                    <button class="play-game-btn" onclick="alert('Game launching soon!')">Play Now</button>
+                    <button class="favorite-btn" onclick="toggleFavorite()">⭐ Add to Favorites</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header id="home">
+            <h1 class="logo">Vstudio</h1>
+            <p class="tagline">Crafting Epic Roblox Experiences</p>
+        </header>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <h2 class="section-title">About Vstudio</h2>
+            <div class="about-content">
+                <p class="about-text">
+                    Welcome to Vstudio, where creativity meets innovation in the Roblox universe! We're a passionate team of developers, designers, and gamers dedicated to creating unforgettable gaming experiences. Our mission is to push the boundaries of what's possible on Roblox, delivering high-quality games that captivate players worldwide.
+                </p>
+                <p class="about-text">
+                    From intense battle royales to creative sandbox adventures, every game we create is crafted with attention to detail, smooth gameplay, and endless fun. Join thousands of players in our growing community and experience the future of Roblox gaming!
+                </p>
+            </div>
+        </section>
+
+        <section id="games" class="projects-section">
+            <h2 class="section-title">Our Games</h2>
+            <div class="projects-grid">
+                <div class="project-card" onclick="openGameModal('galaxy-drifts')">
+                    <div class="project-icon">🌌</div>
+                    <h3 class="project-title">Galaxy Drifts</h3>
+                    <p class="project-description">Embark on an epic journey through mystical lands filled with challenges, treasures, and legendary bosses.</p>
+                    <span class="project-status">Coming Soon</span>
+                </div>
+
+                <div class="project-card" onclick="openGameModal('speed-run-arena')">
+                    <div class="project-icon">🏆</div>
+                    <h3 class="project-title">Speed Run Arena</h3>
+                    <p class="project-description">Test your parkour skills in this fast-paced competitive obby with global leaderboards and custom tracks.</p>
+                    <span class="project-status">Live</span>
+                </div>
+
+                <div class="project-card" onclick="openGameModal('space-tycoon')">
+                    <div class="project-icon">🚀</div>
+                    <h3 class="project-title">Space Tycoon</h3>
+                    <p class="project-description">Build your own galactic empire! Manage resources, upgrade stations, and explore the infinite cosmos.</p>
+                    <span class="project-status">Beta</span>
+                </div>
+
+                <div class="project-card" onclick="openGameModal('bloxy-playhouse')">
+                    <div class="project-icon">👻</div>
+                    <h3 class="project-title">Bloxy Playhouse</h3>
+                    <p class="project-description">Enter if you dare... A terrifying horror experience that will keep you on edge. Chapter 2 now available!</p>
+                    <span class="project-status">Live - Chapter 2</span>
+                </div>
+
+                <div class="project-card" onclick="openGameModal('battle-royale-x')">
+                    <div class="project-icon">⚔️</div>
+                    <h3 class="project-title">Battle Royale X</h3>
+                    <p class="project-description">Last player standing wins! Drop into intense PvP combat with unique weapons and dynamic storm mechanics.</p>
+                    <span class="project-status">Coming Soon</span>
+                </div>
+
+                <div class="project-card" onclick="openGameModal('creative-studio')">
+                    <div class="project-icon">🎨</div>
+                    <h3 class="project-title">Creative Studio</h3>
+                    <p class="project-description">Unleash your imagination with powerful building tools and share your creations with the community.</p>
+                    <span class="project-status">Planned</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Merch Section -->
+        <section id="merch" class="merch-section">
+            <h2 class="section-title">Official Merch</h2>
+            <div class="merch-grid">
+                <div class="merch-card">
+                    <div class="merch-icon">👕</div>
+                    <h3 class="merch-title">Vstudio T-Shirts</h3>
+                    <p class="merch-description">Rep your favorite dev team with our premium cotton tees featuring exclusive designs.</p>
+                    <div class="merch-price">$24.99</div>
+                    <button class="merch-button">Coming Soon</button>
+                </div>
+
+                <div class="merch-card">
+                    <div class="merch-icon">🧢</div>
+                    <h3 class="merch-title">Gaming Caps</h3>
+                    <p class="merch-description">Stylish snapback caps with embroidered Vstudio logo. Perfect for any gamer.</p>
+                    <div class="merch-price">$19.99</div>
+                    <button class="merch-button">Coming Soon</button>
+                </div>
+
+                <div class="merch-card">
+                    <div class="merch-icon">🎮</div>
+                    <h3 class="merch-title">Exclusive Stickers</h3>
+                    <p class="merch-description">Deck out your setup with our holographic sticker pack featuring all our games.</p>
+                    <div class="merch-price">$9.99</div>
+                    <button class="merch-button">Coming Soon</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Developer Section (Hidden by default) -->
+        <section id="developer" class="developer-section" style="display: none;">
+            <h2 class="section-title">🔧 Developer Dashboard</h2>
+            
+            <div class="dev-panel">
+                <div class="dev-card">
+                    <h3 class="dev-card-title">Game Analytics</h3>
+                    <p class="dev-info">Total Players: <span class="dev-stat" id="totalPlayers">127,543</span></p>
+                    <p class="dev-info">Active Now: <span class="dev-stat" id="activePlayers">2,891</span></p>
+                    <p class="dev-info">Revenue: <span class="dev-stat" id="revenue">$12,450</span></p>
+                    <button class="dev-action-btn" onclick="refreshAnalytics()">🔄 Refresh Stats</button>
+                    <button class="dev-action-btn" onclick="addPlayers()">➕ Add Players (Testing)</button>
+                </div>
+
+                <div class="dev-card">
+                    <h3 class="dev-card-title">Server Status</h3>
+                    <p class="dev-info">Main Server: <span class="dev-stat status-online" id="mainServer">Online</span></p>
+                    <p class="dev-info">Beta Server: <span class="dev-stat status-online" id="betaServer">Online</span></p>
+                    <p class="dev-info">Test Server: <span class="dev-stat status-offline" id="testServer">Offline</span></p>
+                    <button class="dev-action-btn" onclick="toggleServer('test')">⚡ Start Test Server</button>
+                </div>
+
+                <div class="dev-card">
+                    <h3 class="dev-card-title">Quick Actions</h3>
+                    <button class="dev-action-btn" onclick="deployUpdate()">🚀 Deploy Update</button>
+                    <button class="dev-action-btn" onclick="viewLogs()">📋 View Logs</button>
+                    <button class="dev-action-btn" onclick="openTeamManagement()">👥 Manage Team</button>
+                </div>
+
+                <div class="dev-card">
+                    <h3 class="dev-card-title">Recent Updates</h3>
+                    <p class="dev-info-small">✅ v2.3.1 deployed - 2 hours ago</p>
+                    <p class="dev-info-small">🔧 Bug fix #842 - 5 hours ago</p>
+                    <p class="dev-info-small">🎨 UI update pushed - 1 day ago</p>
+                    <button class="dev-action-btn" onclick="addUpdate()">➕ Add Update</button>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="tasks-section">
+                <h3 class="dev-card-title" style="font-size: 2rem; margin-bottom: 1.5rem;">📝 Development Tasks</h3>
+                <div class="add-task-form">
+                    <input type="text" id="taskInput" class="task-input" placeholder="Enter new task...">
+                    <button class="add-task-btn" onclick="addTask()">➕ Add Task</button>
+                </div>
+                <div id="tasksList" class="tasks-list">
+                    <!-- Tasks will be added here dynamically -->
+                </div>
+            </div>
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </section>
+
+        <!-- Team Management Modal -->
+        <div id="teamModal" class="modal">
+            <div class="modal-content team-modal">
+                <span class="close-modal" onclick="closeTeamModal()">&times;</span>
+                <h2 class="modal-title">Team Management</h2>
+                
+                <div class="team-management">
+                    <div class="add-member-section">
+                        <h3 class="settings-section-title">Add New Member</h3>
+                        <div class="add-member-form">
+                            <input type="text" id="newMemberName" class="auth-input" placeholder="Username">
+                            <input type="text" id="newMemberRole" class="auth-input" placeholder="Role (e.g., Developer, Designer)">
+                            <button class="add-member-btn" onclick="addTeamMember()">➕ Add Member</button>
+                        </div>
+                    </div>
+
+                    <div class="team-members-list">
+                        <h3 class="settings-section-title">Current Team</h3>
+                        <div id="teamMembersList">
+                            <!-- Team members will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Support Section -->
+        <section id="contact" class="contact-section">
+            <h2 class="section-title">Contact Support</h2>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">📧</div>
+                        <h3 class="contact-title">Email Us</h3>
+                        <p class="contact-text">Rayyanofficial2024@gmail.com</p>
+                        <p class="contact-description">Get a response within 24 hours</p>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="contact-icon">💬</div>
+                        <h3 class="contact-title">Discord Server</h3>
+                        <p class="contact-text">discord.gg/vstudio</p>
+                        <p class="contact-description">Join our community of 20 members</p>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="contact-icon">🐦</div>
+                        <h3 class="contact-title">Social Media</h3>
+                        <p class="contact-text">@TydalWavey</p>
+                        <p class="contact-description">Follow us for updates and news</p>
+                    </div>
+                </div>
+
+                <div class="contact-form-wrapper">
+                    <h3 class="form-title">Send us a Message</h3>
+                    <form class="contact-form" onsubmit="handleSubmit(event)">
+                        <div class="form-group">
+                            <input type="text" class="form-input" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" class="form-input" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-input" required>
+                                <option value="">Select Issue Type</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="account">Account Issue</option>
+                                <option value="general">General Inquiry</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-input form-textarea" placeholder="Describe your issue..." rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="form-submit">Submit Request</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 Vstudio - Building the Future of Roblox Gaming</p>
+        </footer>
+    </div>
+</body>
+</html>
